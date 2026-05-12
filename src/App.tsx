@@ -68,6 +68,7 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   // Form State
   const [form, setForm] = useState({
@@ -110,11 +111,28 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 700000) {
+      alert("Файл слишком крупный (>700KB). Пожалуйста, используйте более оптимизированную версию или внешний URL.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setForm(prev => ({ ...prev, modelUrl: event.target?.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || uploading) return;
 
     try {
+      setUploading(true);
       await addDoc(collection(db, "projects"), {
         ...form,
         ownerId: user.uid,
@@ -131,6 +149,8 @@ export default function App() {
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, "projects");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -557,12 +577,21 @@ export default function App() {
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">3D модель (.glb)</label>
-                      <input 
-                        value={form.modelUrl}
-                        onChange={e => setForm({...form, modelUrl: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
-                        placeholder="https://... (Необязательно)"
-                      />
+                      <div className="flex flex-col gap-3">
+                         <input 
+                           type="file"
+                           accept=".glb,.gltf"
+                           onChange={handleFileChange}
+                           className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-600/10 file:text-blue-400 hover:file:bg-blue-600/20 cursor-pointer"
+                         />
+                         <div className="text-[9px] text-slate-600 italic">Или укажите прямую ссылку:</div>
+                         <input 
+                           value={form.modelUrl && !form.modelUrl.startsWith('data:') ? form.modelUrl : ''}
+                           onChange={e => setForm({...form, modelUrl: e.target.value})}
+                           className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 outline-none focus:border-blue-500 transition-colors text-sm"
+                           placeholder="https://..."
+                         />
+                      </div>
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Описание</label>
@@ -574,9 +603,10 @@ export default function App() {
                    </div>
                    <button 
                      type="submit"
-                     className="w-full py-5 bg-blue-600 text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all group"
+                     disabled={uploading}
+                     className={`w-full py-5 bg-blue-600 text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                    >
-                     ОПУБЛИКОВАТЬ ПРОЕКТ <Upload className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+                     {uploading ? "ЗАГРУЗКА..." : "ОПУБЛИКОВАТЬ ПРОЕКТ"} <Upload className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
                    </button>
                 </form>
                 <button 

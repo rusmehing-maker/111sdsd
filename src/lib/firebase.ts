@@ -1,10 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
@@ -57,10 +59,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 
 async function testConnection() {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
+    // Attempting to read a doc to test connectivity
+    await getDocFromServer(doc(db, 'projects', 'connection-test'));
   } catch (error) {
-    if(error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
+    if (error instanceof Error) {
+      if (error.message.includes('the client is offline')) {
+        console.error("Firebase Connectivity Error: Could not reach Firestore. Please check your configuration and network.");
+      } else {
+        // Permission denied is expected for this specific path, which is fine
+        console.log("Firebase Connection Initialized (Response received)");
+      }
     }
   }
 }
