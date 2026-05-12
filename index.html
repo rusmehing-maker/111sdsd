@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VertexViz Portfolio - Standalone</title>
+    <title>VertexViz | Professional 3D Architecture Portfolio</title>
+    
+    <!-- 
+        STANDALONE DEPLOYMENT GUIDE:
+        1. Copy this entire index.html file.
+        2. Upload it to your GitHub repository as 'index.html'.
+        3. Enable GitHub Pages in your repository settings.
+        No build step required. All scripts and styles are self-contained.
+    -->
+
+    <meta name="description" content="Professional 3D visualization portfolio for architects and designers.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233b82f6%22/><path d=%22M30 70 L50 30 L70 70 Z%22 fill=%22white%22/></svg>">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,21 +95,21 @@
 <body>
     <div id="root"></div>
 
-    <!-- Import Map for Dependencies -->
+    <!-- Import Map for Dependencies - Using bundled versions for stability -->
     <script type="importmap">
     {
         "imports": {
-            "react": "https://esm.sh/react@19?dev",
-            "react-dom": "https://esm.sh/react-dom@19?dev",
-            "react-dom/client": "https://esm.sh/react-dom@19/client?dev",
-            "framer-motion": "https://esm.sh/framer-motion@11",
-            "lucide-react": "https://esm.sh/lucide-react@0.460.0",
-            "firebase/app": "https://esm.sh/firebase@11/app",
-            "firebase/auth": "https://esm.sh/firebase@11/auth",
-            "firebase/firestore": "https://esm.sh/firebase@11/firestore",
+            "react": "https://esm.sh/react@18?bundle",
+            "react-dom": "https://esm.sh/react-dom@18?bundle",
+            "react-dom/client": "https://esm.sh/react-dom@18/client?bundle",
+            "framer-motion": "https://esm.sh/framer-motion@11?bundle",
+            "lucide-react": "https://esm.sh/lucide-react@0.460.0?bundle",
+            "firebase/app": "https://esm.sh/firebase@11.1.0/app",
+            "firebase/auth": "https://esm.sh/firebase@11.1.0/auth",
+            "firebase/firestore": "https://esm.sh/firebase@11.1.0/firestore",
             "three": "https://esm.sh/three@0.170.0",
-            "@react-three/fiber": "https://esm.sh/@react-three/fiber@8",
-            "@react-three/drei": "https://esm.sh/@react-three/drei@9"
+            "@react-three/fiber": "https://esm.sh/@react-three/fiber@8?deps=react@18,react-dom@18,three@0.170.0",
+            "@react-three/drei": "https://esm.sh/@react-three/drei@9?deps=react@18,react-dom@18,three@0.170.0,@react-three/fiber@8"
         }
     }
     </script>
