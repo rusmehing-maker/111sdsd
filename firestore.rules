@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isValidProject(data) {
+      return data.title is string && data.title.size() <= 100
+        && data.category is string && data.category.size() <= 32
+        && data.imageUrl is string && data.imageUrl.size() <= 1024
+        && (data.get('modelUrl', '') == '' || (data.modelUrl is string && data.modelUrl.size() <= 1024))
+        && data.ownerId == request.auth.uid
+        && data.createdAt == request.time;
+    }
+
+    // --- Project Collection ---
+    match /projects/{projectId} {
+      // Anyone can see projects (Public Portfolio)
+      allow list: if true;
+      allow get: if true;
+
+      // Only registered users can create projects
+      allow create: if isSignedIn() 
+        && isValidId(projectId)
+        && isValidProject(incoming())
+        && incoming().keys().hasAll(['title', 'category', 'imageUrl', 'ownerId', 'createdAt'])
+        && incoming().keys().size() >= 5;
+
+      // Only owners can update or delete
+      allow update: if isOwner(existing().ownerId)
+        && isValidProject(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt;
+
+      allow delete: if isOwner(existing().ownerId);
+    }
+  }
+}
