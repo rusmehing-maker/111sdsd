@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VertexViz | Professional 3D Architecture Portfolio</title>
+    <title>AETHER | Architectural Visualization & VR</title>
     
-    <meta name="description" content="Professional 3D visualization portfolio for architects and designers.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233b82f6%22/><path d=%22M30 70 L50 30 L70 70 Z%22 fill=%22white%22/></svg>">
+    <meta name="description" content="Exclusive 3D architectural visualization and immersive VR experiences.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22/><path d=%22M30 50 L70 50 M50 30 L50 70%22 stroke=%22white%22 stroke-width=%222%22/></svg>">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS (v3 CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,11 +20,14 @@
             theme: {
                 extend: {
                     colors: {
-                        surface: '#020617',
-                        brand: '#3b82f6',
+                        background: '#000000',
+                        accent: '#ffffff',
+                        muted: '#404040',
+                        silver: '#a3a3a3',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                 }
@@ -33,51 +36,85 @@
     </script>
     
     <style>
-        body {
-            background-color: #020617 !important;
-            color: #f1f5f9 !important;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            margin: 0;
-            overflow-x: hidden;
+        :root {
+            --bg: #000000;
+            --foreground: #ffffff;
         }
-        
-        #root { min-height: 100vh; }
 
-        ::selection {
-            background-color: rgba(59, 130, 246, 0.3);
+        body {
+            background-color: var(--bg);
+            color: var(--foreground);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            margin: 0;
+            cursor: default;
         }
-        
-        .text-gradient {
-            background: linear-gradient(to right, #60a5fa, #67e8f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        /* Recipe 4: Dark Luxury Elements */
+        .luxury-line {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            width: 100%;
+        }
+
+        .text-huge {
+            font-size: clamp(3rem, 15vw, 12rem);
+            line-height: 0.85;
+            letter-spacing: -0.04em;
+            font-weight: 200;
         }
 
         .glass {
-            backdrop-filter: blur(12px);
-            background-color: rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            background-color: rgba(15, 23, 42, 0.6);
+        .vertical-rail {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.4;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .oval-mask {
+            clip-path: ellipse(50% 50% at 50% 50%);
+        }
+
+        /* Scroll Progress */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ffffff;
+            transform-origin: 0%;
+            z-index: 100;
+        }
+
+        canvas {
+            touch-action: none;
+        }
+
+        ::selection {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
+    <!-- Import Map for CDNs -->
     <script type="importmap">
     {
         "imports": {
@@ -97,9 +134,9 @@
     </script>
 
     <script type="module">
-        import React, { useState, useEffect, Suspense } from 'react';
+        import React, { useState, useEffect, useRef, Suspense } from 'react';
         import ReactDOM from 'react-dom/client';
-        import { motion, AnimatePresence } from 'framer-motion';
+        import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
         import * as Lucide from 'lucide-react';
         import { initializeApp } from 'firebase/app';
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -107,10 +144,10 @@
             initializeFirestore, collection, addDoc, onSnapshot, query, 
             orderBy, serverTimestamp, doc, getDocFromServer 
         } from 'firebase/firestore';
-        import { Canvas } from '@react-three/fiber';
-        import { OrbitControls, Stage, useGLTF, PresentationControls, Environment, ContactShadows, useProgress } from '@react-three/drei';
+        import { Canvas, useFrame } from '@react-three/fiber';
+        import { OrbitControls, Stage, useGLTF, PresentationControls, Environment, ContactShadows, useProgress, Float } from '@react-three/drei';
 
-        // --- Firebase Config ---
+        // --- Firebase Config (Maintained) ---
         const firebaseConfig = {
             projectId: "gen-lang-client-0470000751",
             appId: "1:211318264202:web:a78a05f010aa3d94467873",
@@ -128,7 +165,7 @@
 
         const h = React.createElement;
 
-        // --- 3D Model Component ---
+        // --- 3D Model Helpers ---
         function Model({ url }) {
             const { scene } = useGLTF(url);
             return h('primitive', { object: scene });
@@ -137,55 +174,72 @@
         function LoaderOverlay() {
             const { progress, active } = useProgress();
             if (!active && progress === 100) return null;
-
             return h(motion.div, {
-                className: "absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm z-30 pointer-events-none",
+                className: "absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-3xl z-[60]",
                 initial: { opacity: 0 },
                 animate: { opacity: 1 }
             }, 
-                h('div', { className: "w-56 h-1 bg-slate-900 rounded-full overflow-hidden mb-5" },
+                h('div', { className: "w-40 h-[1px] bg-white/10 mb-4 overflow-hidden" },
                     h(motion.div, { 
-                        className: "h-full bg-blue-600",
+                        className: "h-full bg-white",
                         animate: { width: `${progress}%` }
                     })
                 ),
-                h('div', { className: "text-[10px] font-mono text-blue-400 uppercase tracking-widest" }, 
-                    `Syncing Surface: ${Math.round(progress)}%`
-                )
+                h('div', { className: "text-[8px] font-mono text-white/40 uppercase tracking-[0.5em]" }, `Allocating Geometry... ${Math.round(progress)}%`)
             );
         }
 
         function ModelViewer({ url }) {
-            return h('div', { className: "w-full h-[400px] bg-slate-950 rounded-2xl overflow-hidden relative border border-slate-800" },
-                h(Suspense, { fallback: h('div', { className: "absolute inset-0 flex items-center justify-center text-xs font-mono text-slate-500 animate-pulse" }, "INITIALIZING...") },
+            return h('div', { className: "w-full h-full min-h-[400px] relative bg-black" },
+                h(Suspense, { fallback: null },
                     h(LoaderOverlay),
-                    h(Canvas, { shadows: true, camera: { position: [0, 0, 4], fov: 45 } },
-                        h(Environment, { preset: "city" }),
+                    h(Canvas, { shadows: true, camera: { position: [0, 0, 5], fov: 35 } },
+                        h(Environment, { preset: "studio" }),
                         h(PresentationControls, {
                             global: true,
                             config: { mass: 2, tension: 500 },
                             rotation: [0, 0.3, 0],
                             polar: [-Math.PI / 3, Math.PI / 3],
                         },
-                            h(Stage, { environment: "city", intensity: 0.5, contactShadow: true, adjustCamera: true },
-                                h(Model, { url: url })
+                            h(Float, { speed: 2, rotationIntensity: 0.5, floatIntensity: 0.5 },
+                                h(Stage, { environment: "studio", intensity: 0.5, contactShadow: true, adjustCamera: true },
+                                    h(Model, { url: url })
+                                )
                             )
                         ),
-                        h(OrbitControls, { makeDefault: true, enableZoom: false, autoRotate: true }),
-                        h(ContactShadows, { position: [0, -0.8, 0], opacity: 0.4, scale: 5, blur: 2 })
+                        h(OrbitControls, { makeDefault: true, enableZoom: false, autoRotation: true }),
+                        h(ContactShadows, { position: [0, -1, 0], opacity: 0.5, scale: 10, blur: 2 })
                     )
                 )
             );
         }
 
+        // --- Comp: Interactive Cursor ---
+        function CustomCursor() {
+            const [pos, setPos] = useState({ x: 0, y: 0 });
+            useEffect(() => {
+                const move = (e) => setPos({ x: e.clientX, y: e.clientY });
+                window.addEventListener('mousemove', move);
+                return () => window.removeEventListener('mousemove', move);
+            }, []);
+            return h(motion.div, {
+                className: "fixed top-0 left-0 w-8 h-8 rounded-full border border-white/20 pointer-events-none z-[9999] hidden md:block",
+                animate: { x: pos.x - 16, y: pos.y - 16 },
+                transition: { type: 'spring', damping: 25, stiffness: 250 }
+            });
+        }
+
         function App() {
+            const { scrollYProgress } = useScroll();
+            const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+            
             const [scrolled, setScrolled] = useState(false);
             const [user, setUser] = useState(null);
             const [projects, setProjects] = useState([]);
             const [isAddModalOpen, setIsAddModalOpen] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
             const [uploading, setUploading] = useState(false);
-            const [form, setForm] = useState({ title: "", category: "INTERIOR", imageUrl: "", modelUrl: "", description: "", year: "2024" });
+            const [form, setForm] = useState({ title: "", category: "ARCHITECTURE", imageUrl: "", modelUrl: "", description: "", year: "2024" });
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -194,7 +248,7 @@
                 const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
                 const unsubscribeProjects = onSnapshot(q, (snapshot) => {
                     setProjects(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                }, (error) => console.log("Firebase error:", error));
+                });
                 return () => {
                     window.removeEventListener("scroll", handleScroll);
                     unsubscribeAuth();
@@ -205,7 +259,7 @@
             const handleFileChange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 700000) return alert("Файл слишком велик (>700KB)");
+                if (file.size > 1000000) return alert("Файл слишком велик (>1MB)");
                 const reader = new FileReader();
                 reader.onload = (ev) => setForm(p => ({ ...p, modelUrl: ev.target.result }));
                 reader.readAsDataURL(file);
@@ -218,108 +272,174 @@
                 try {
                     await addDoc(collection(db, "projects"), { ...form, ownerId: user.uid, createdAt: serverTimestamp() });
                     setIsAddModalOpen(false);
-                    setForm({ title: "", category: "INTERIOR", imageUrl: "", modelUrl: "", description: "", year: "2024" });
+                    setForm({ title: "", category: "ARCHITECTURE", imageUrl: "", modelUrl: "", description: "", year: "2024" });
                 } catch (err) { alert(err.message); }
                 setUploading(false);
             };
 
-            return h('div', { className: "min-h-screen font-sans bg-slate-950 text-slate-100" },
-                h('nav', { className: `fixed top-0 w-full z-50 transition-all ${scrolled ? "glass py-4" : "py-8"}` },
-                    h('div', { className: "max-w-7xl mx-auto px-6 flex justify-between items-center" },
-                        h('div', { className: "flex items-center gap-2 font-bold uppercase text-xl cursor-default", onClick: () => window.scrollTo({top: 0, behavior: 'smooth'}) },
-                            h('div', { className: "w-8 h-8 bg-blue-600 rounded-lg shadow-lg shadow-blue-600/20" }),
-                            h('span', null, "Vertex", h('span', { className: "text-blue-400" }, "Viz"))
+            return h('div', { className: "bg-black min-h-screen text-white select-none selection:bg-white selection:text-black" },
+                h(motion.div, { className: "progress-bar", style: { scaleX } }),
+                h(CustomCursor),
+
+                // Navigation
+                h('nav', { className: `fixed top-0 w-full z-[100] transition-colors duration-700 ${scrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/5' : ''}` },
+                    h('div', { className: "max-w-screen-2xl mx-auto px-8 h-20 flex justify-between items-center" },
+                        h('div', { className: "flex items-center gap-12" },
+                            h('span', { className: "text-xs font-bold tracking-[0.5em] uppercase hover:opacity-100 opacity-60 transition-opacity cursor-pointer" }, "AETHER"),
+                            h('div', { className: "hidden md:flex gap-8 text-[10px] font-bold tracking-widest uppercase text-white/40" },
+                                h('a', { href: "#works", className: "hover:text-white transition-colors" }, "Archive"),
+                                h('a', { href: "#about", className: "hover:text-white transition-colors" }, "Manifesto")
+                            )
                         ),
                         h('div', { className: "flex items-center gap-6" },
                             user ? h('div', { className: "flex items-center gap-4" },
-                                h('button', { onClick: () => setIsAddModalOpen(true), className: "flex items-center gap-2 px-4 py-2 bg-blue-600/10 text-blue-400 border border-blue-600/20 rounded-full text-sm font-bold" },
-                                    h(Lucide.Plus, { size: 14 }), "ПРОЕКТ"
-                                ),
-                                h('img', { src: user.photoURL, className: "w-8 h-8 rounded-full border border-slate-700" }),
-                                h('button', { onClick: () => signOut(auth) }, h(Lucide.LogOut, { size: 18, className: "text-slate-500 hover:text-red-400 transition-colors" }))
-                            ) : h('button', { onClick: () => signInWithPopup(auth, googleProvider), className: "px-6 py-2 bg-white text-slate-950 rounded-full font-bold text-sm" }, "Войти")
+                                h('button', { onClick: () => setIsAddModalOpen(true), className: "text-[10px] font-bold tracking-widest border border-white/20 rounded-full px-5 py-2 hover:bg-white hover:text-black transition-all" }, "CURate"),
+                                h('button', { onClick: () => signOut(auth) }, h(Lucide.LogOut, { size: 14, className: "text-white/40 hover:text-white" }))
+                            ) : h('button', { onClick: () => signInWithPopup(auth, googleProvider), className: "text-[10px] font-bold tracking-widest text-white/40 hover:text-white" }, "Access")
                         )
                     )
                 ),
 
-                h('header', { className: "min-h-screen flex items-center px-6" },
-                    h('div', { className: "max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12" },
-                        h('div', { className: "flex flex-col justify-center gap-8 text-left" },
-                            h('div', { className: "inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full w-fit" },
-                                h('span', { className: "w-2 h-2 bg-blue-400 rounded-full animate-pulse" }),
-                                h('span', { className: "text-[10px] font-bold text-blue-400 uppercase tracking-widest" }, "3D Visualization Studio")
+                // Hero Section
+                h('header', { className: "h-screen flex items-center justify-center px-8 relative overflow-hidden" },
+                    h(motion.div, { 
+                        initial: { opacity: 0, y: 100 }, 
+                        animate: { opacity: 1, y: 0 }, 
+                        transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
+                        className: "text-center relative z-10" 
+                    },
+                        h('div', { className: "text-[10px] font-bold tracking-[0.8em] uppercase text-white/40 mb-12" }, "Architectural Visualist"),
+                        h('h1', { className: "text-huge font-extralight italic serif mb-12" }, "Synthetica"),
+                        h('p', { className: "max-w-lg mx-auto text-sm text-white/40 leading-relaxed font-light tracking-wide italic" }, 
+                            "Blending structural precision with atmospheric artistry. We create digital twins of unbuilt realities."
+                        )
+                    ),
+                    h('div', { className: "absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-20" },
+                        h('div', { className: "w-[1px] h-20 bg-white" }),
+                        h('span', { className: "text-[8px] font-bold tracking-widest uppercase" }, "Scroll")
+                    )
+                ),
+
+                // Portfolio Archive
+                h('section', { id: "works", className: "py-40 px-8" },
+                    h('div', { className: "max-w-screen-2xl mx-auto" },
+                        h('div', { className: "flex items-end justify-between mb-32 border-b border-white/10 pb-12" },
+                            h('div', null,
+                                h('div', { className: "text-[10px] font-bold tracking-widest text-white/40 uppercase mb-4" }, "01 / Index"),
+                                h('h2', { className: "text-6xl font-light italic serif" }, "Archive")
                             ),
-                            h('h1', { className: "text-6xl md:text-8xl font-black leading-none tracking-tighter" },
-                                "CRAFTING ", h('br'), h('span', { className: "text-gradient" }, "SPACES")
-                            ),
-                            h('p', { className: "text-slate-400 text-lg max-w-md leading-relaxed" }, 
-                                "Фотореалистичная визуализация архитектуры и интерьеров. Мы оживляем ваши проекты."
-                            ),
-                            h('a', { href: "#work", className: "px-10 py-5 bg-blue-600 rounded-2xl font-bold w-fit shadow-2xl shadow-blue-600/30 text-white" }, "Смотреть работы")
+                            h('div', { className: "text-[10px] font-mono text-white/40" }, projects.length + " SELECTED WORKS")
                         ),
-                        h('div', { className: "hidden lg:grid grid-cols-2 gap-4 h-[500px]" },
-                            projects.slice(0, 4).map(p => h('div', { key: p.id, className: "rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer", onClick: () => setSelectedProject(p) },
-                                h('img', { src: p.imageUrl, className: "w-full h-full object-cover opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500" })
+                        
+                        h('div', { className: "grid grid-cols-1 gap-40" },
+                            projects.map((p, idx) => h(motion.div, { 
+                                key: p.id,
+                                initial: { opacity: 0, y: 50 },
+                                whileInView: { opacity: 1, y: 0 },
+                                viewport: { once: true },
+                                className: "group relative grid grid-cols-1 lg:grid-cols-12 gap-12 items-center"
+                            },
+                                h('div', { className: `lg:col-span-7 ${idx % 2 === 0 ? '' : 'lg:order-2'}` }, 
+                                    h('div', { 
+                                        className: "aspect-[16/10] overflow-hidden bg-white/5 relative cursor-pointer",
+                                        onClick: () => setSelectedProject(p)
+                                    },
+                                        h('img', { 
+                                            src: p.imageUrl, 
+                                            className: "w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" 
+                                        }),
+                                        h('div', { className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm" },
+                                            h('div', { className: "border border-white/40 rounded-full w-20 h-20 flex items-center justify-center text-[10px] tracking-widest font-bold uppercase" }, "VIEW")
+                                        )
+                                    )
+                                ),
+                                h('div', { className: `lg:col-span-5 text-left ${idx % 2 === 0 ? '' : 'lg:order-1 lg:text-right'}` },
+                                    h('div', { className: "text-[8px] font-bold tracking-widest text-white/40 uppercase mb-8" }, p.category + " — " + p.year),
+                                    h('h3', { className: "text-5xl font-light italic serif mb-8 leading-tight" }, p.title),
+                                    h('p', { className: "text-white/40 text-sm leading-relaxed font-light mb-12 max-w-sm ml-auto mr-auto lg:mr-0 inline-block" }, p.description),
+                                    h('button', { 
+                                        onClick: () => setSelectedProject(p),
+                                        className: "block text-[10px] font-bold tracking-widest uppercase hover:underline underline-offset-8" 
+                                    }, "Deep Dive →")
+                                )
                             ))
                         )
                     )
                 ),
 
-                h('section', { id: "work", className: "py-24 px-6 max-w-7xl mx-auto" },
-                    h('h2', { className: "text-4xl font-bold mb-16 uppercase tracking-tighter text-left" }, "Портфолио"),
-                    h('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-10" },
-                        projects.map(p => h('div', { 
-                            key: p.id, 
-                            className: "group relative aspect-video rounded-[3rem] overflow-hidden bg-slate-900 border border-slate-800 card-hover cursor-pointer",
-                            onClick: () => setSelectedProject(p)
-                        },
-                            h('img', { src: p.imageUrl, className: "w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" }),
-                            h('div', { className: "absolute bottom-10 left-10 text-left" },
-                                h('div', { className: "text-[10px] font-bold text-blue-400 uppercase mb-2" }, p.category),
-                                h('h3', { className: "text-3xl font-black flex items-center gap-3" }, p.title, p.modelUrl && h(Lucide.Box, { size: 24, className: "text-blue-500" }))
-                            )
-                        ))
-                    )
-                ),
-
-                h(AnimatePresence, null, 
-                    isAddModalOpen && h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl" },
-                        h(motion.div, { initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0 }, className: "w-full max-w-xl bg-slate-900 border border-slate-800 rounded-[2.5rem] p-12 relative" },
-                            h('button', { className: "absolute top-8 right-8 text-slate-500 hover:text-white", onClick: () => setIsAddModalOpen(false) }, h(Lucide.X, { size: 24 })),
-                            h('h3', { className: "text-3xl font-black mb-8 uppercase text-left" }, "Новый Проект"),
-                            h('form', { onSubmit: handleAddProject, className: "flex flex-col gap-4 text-left" },
-                                h('input', { required: true, className: "bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 outline-none text-white", placeholder: "Название", value: form.title, onChange: e => setForm({...form, title: e.target.value}) }),
-                                h('input', { required: true, className: "bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none text-white", placeholder: "Обложка (URL)", value: form.imageUrl, onChange: e => setForm({...form, imageUrl: e.target.value}) }),
-                                h('div', { className: "flex flex-col gap-2" },
-                                    h('label', { className: "text-[10px] font-bold text-slate-500 uppercase px-1" }, "3D Модель (.glb)"),
-                                    h('input', { type: "file", accept: ".glb", onChange: handleFileChange, className: "text-xs file:bg-blue-600/10 file:text-blue-400 file:border-0 file:py-2 file:px-4 file:rounded-full cursor-pointer" }),
-                                    h('input', { className: "bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs outline-none text-white", placeholder: "Или URL модели", value: form.modelUrl && !form.modelUrl.startsWith('data') ? form.modelUrl : '', onChange: e => setForm({...form, modelUrl: e.target.value}) })
+                // Manifest Section
+                h('section', { id: "about", className: "py-40 bg-white text-black" },
+                    h('div', { className: "max-w-screen-xl mx-auto px-8" },
+                        h('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-20 items-center" },
+                            h('div', { className: "luxury-line lg:hidden" }),
+                            h('h2', { className: "text-huge serif italic font-thin" }, "Lux"),
+                            h('div', { className: "space-y-12" },
+                                h('h4', { className: "text-2xl font-light leading-relaxed italic" }, 
+                                    "We believe that every architectural project deserves a narrative. Light is our ink, and the void is our canvas."
                                 ),
-                                h('textarea', { className: "bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 min-h-[100px] text-white", placeholder: "Описание", value: form.description, onChange: e => setForm({...form, description: e.target.value}) }),
-                                h('button', { type: "submit", disabled: uploading, className: "py-5 bg-blue-600 rounded-2xl font-bold uppercase shadow-xl text-white" }, uploading ? "Загрузка..." : "Опубликовать")
+                                h('p', { className: "text-sm text-black/60 leading-[2] font-light" }, 
+                                    "Our studio operates at the intersection of high-end photography and parametric design. By utilizing advanced path-tracing technologies and custom shader workflows, we bridge the gap between imagination and perception."
+                                )
                             )
                         )
                     )
                 ),
 
+                // Add Project Modal
+                h(AnimatePresence, null, 
+                    isAddModalOpen && h('div', { className: "fixed inset-0 z-[200] flex items-center justify-center p-8 bg-black/90 backdrop-blur-xl" },
+                        h(motion.div, { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0 }, className: "w-full max-w-lg bg-white text-black rounded-lg p-12 relative" },
+                            h('button', { className: "absolute top-8 right-8 text-black/20 hover:text-black", onClick: () => setIsAddModalOpen(false) }, h(Lucide.X, { size: 24 })),
+                            h('div', { className: "text-[10px] font-bold tracking-[0.5em] uppercase text-black/40 mb-10 text-center" }, "New Curator Entry"),
+                            h('form', { onSubmit: handleAddProject, className: "flex flex-col gap-8 text-left" },
+                                h('div', { className: "space-y-2" },
+                                    h('label', { className: "text-[8px] font-bold uppercase tracking-widest text-black/40" }, "Subject Name"),
+                                    h('input', { required: true, className: "w-full border-b border-black/10 py-2 outline-none focus:border-black transition-colors" }, { value: form.title, onChange: e => setForm({...form, title: e.target.value}) }),
+                                ),
+                                h('div', { className: "space-y-2" },
+                                    h('label', { className: "text-[8px] font-bold uppercase tracking-widest text-black/40" }, "Visual Asset (URL)"),
+                                    h('input', { required: true, className: "w-full border-b border-black/10 py-2 outline-none focus:border-black text-xs" }, { value: form.imageUrl, onChange: e => setForm({...form, imageUrl: e.target.value}) }),
+                                ),
+                                h('div', { className: "flex flex-col gap-4" },
+                                    h('label', { className: "text-[8px] font-bold uppercase tracking-widest text-black/40" }, "3D Coordinate (.glb)"),
+                                    h('input', { type: "file", accept: ".glb", onChange: handleFileChange, className: "text-[10px] file:bg-black file:text-white file:border-0 file:py-2 file:px-6 file:rounded-full cursor-pointer" }),
+                                ),
+                                h('textarea', { className: "w-full border border-black/10 p-4 rounded-lg min-h-[100px] outline-none text-sm", placeholder: "Narrative description...", value: form.description, onChange: e => setForm({...form, description: e.target.value}) }),
+                                h('button', { type: "submit", disabled: uploading, className: "w-full py-5 bg-black text-white font-bold tracking-[0.3em] uppercase hover:opacity-90 disabled:opacity-30" }, uploading ? "Encrypting..." : "Publish to Void")
+                            )
+                        )
+                    )
+                ),
+
+                // Project Details Modal
                 h(AnimatePresence, null,
-                    selectedProject && h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/90" },
-                        h(motion.div, { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0 }, className: "w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-[3rem] overflow-hidden flex flex-col lg:flex-row max-h-[90vh]" },
-                            h('div', { className: "lg:w-2/3 bg-slate-950 min-h-[400px] relative" },
-                                selectedProject.modelUrl ? h(ModelViewer, { url: selectedProject.modelUrl }) : h('img', { src: selectedProject.imageUrl, className: "w-full h-full object-cover" }),
-                                h('button', { className: "absolute top-6 right-6 p-2 bg-slate-900/50 rounded-full z-[110]", onClick: () => setSelectedProject(null) }, h(Lucide.X, { size: 20, className: "text-white" }))
+                    selectedProject && h('div', { className: "fixed inset-0 z-[200] bg-black/95 backdrop-blur-2xl flex flex-col md:flex-row overflow-hidden" },
+                        h(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "w-full md:w-3/5 h-[50vh] md:h-full relative" },
+                            selectedProject.modelUrl ? h(ModelViewer, { url: selectedProject.modelUrl }) : h('img', { src: selectedProject.imageUrl, className: "w-full h-full object-cover" }),
+                        ),
+                        h(motion.div, { 
+                            initial: { x: '100%' }, 
+                            animate: { x: 0 }, 
+                            exit: { x: '100%' },
+                            transition: { type: 'spring', damping: 40, stiffness: 400 },
+                            className: "w-full md:w-2/5 p-12 md:p-24 flex flex-col justify-center gap-12 bg-black border-l border-white/5 overflow-y-auto" 
+                        },
+                            h('div', null,
+                                h('div', { className: "text-[10px] font-bold tracking-[0.5em] uppercase text-white/40 mb-8" }, selectedProject.category + " — " + selectedProject.year),
+                                h('h2', { className: "text-6xl font-light serif italic mb-8" }, selectedProject.title),
+                                h('div', { className: "w-20 h-[1px] bg-white/20" })
                             ),
-                            h('div', { className: "lg:w-1/3 p-12 text-left flex flex-col gap-6" },
-                                h('div', { className: "text-[10px] font-bold text-blue-500 uppercase" }, selectedProject.category),
-                                h('h2', { className: "text-4xl font-black uppercase leading-none" }, selectedProject.title),
-                                h('p', { className: "text-slate-400 leading-relaxed" }, selectedProject.description || "Нет описания."),
-                                h('button', { onClick: () => setSelectedProject(null), className: "mt-auto py-4 bg-slate-800 rounded-2xl font-bold text-white" }, "ЗАКРЫТЬ")
+                            h('p', { className: "text-sm text-white/40 leading-loose font-light max-w-sm" }, selectedProject.description || "The spatial narrative for this entity remains classified."),
+                            h('div', { className: "flex gap-6" },
+                                h('button', { onClick: () => setSelectedProject(null), className: "px-10 py-5 border border-white/20 rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all" }, "Return to Index")
                             )
-                        )
+                        ),
+                        h('button', { className: "absolute top-8 right-8 z-[210] p-4 bg-white/5 rounded-full hover:bg-white/10", onClick: () => setSelectedProject(null) }, h(Lucide.X, { size: 24 }))
                     )
                 ),
 
-                h('footer', { className: "py-12 border-t border-slate-900 text-center text-[10px] text-slate-500 tracking-[0.3em] font-bold" }, "© 2024 VERTEX VIZ STUDIO")
+                // Footer
+                h('footer', { className: "py-20 border-t border-white/5 text-center text-[8px] font-bold tracking-[0.8em] text-white/20 uppercase" }, "© 2024 AETHER STUDIO — GENEVA")
             );
         }
 
